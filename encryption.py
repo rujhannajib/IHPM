@@ -42,7 +42,7 @@ def register_new_user(conn, cursor):
         stored_key = derive_key(my_password, stored_salt)
 
         add_password_sql = f"""
-        INSERT INTO users (id, username, salt, hash) VALUES (NULL,?, ?, ?)
+        INSERT INTO users (id, username, salt, hash) VALUES (NULL, %s, %s, %s)
         """
 
         cursor.execute(add_password_sql, (my_username, stored_salt, stored_key))

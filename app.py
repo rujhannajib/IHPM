@@ -3,9 +3,10 @@ import sqlite3
 import encryption as enc
 from cryptography.fernet import Fernet
 import json
+from sqlconfig import get_connection
 
 # connect to db
-conn = sqlite3.connect("app.db")
+conn = get_connection()
 cursor = conn.cursor()
 
 def display_menu():
@@ -50,7 +51,7 @@ def add_password(fi, key):
     print("Password Encrypted")
 
     try:
-        command = f"""INSERT INTO cred (cred_id, platform, username, password, enckey) VALUES (NULL, ?, ?, ?, ?)"""
+        command = f"""INSERT INTO cred (cred_id, platform, username, password, enckey) VALUES (NULL, %s, %s, %s, %s)"""
         cursor.execute(command, (platform, username, encrypted_data, key, ))
         conn.commit()
     except sqlite3.IntegrityError:
@@ -69,7 +70,7 @@ def get_password(fi, key):
     platform = input("Enter the platform name to retrieve: ").lower()
     
     try:
-        command = f"""SELECT * FROM cred WHERE platform = ? and enckey = ?"""
+        command = f"""SELECT * FROM cred WHERE platform = %s and enckey = %s"""
         cursor.execute(command, (platform, key, ))
         res = cursor.fetchone()
         if res:
@@ -90,7 +91,7 @@ def delete_password(key):
     platform = input("Enter the platform name to delete: ").lower()
 
     try:
-        command = f"""DELETE FROM cred WHERE platform = ? and enckey = ?"""
+        command = f"""DELETE FROM cred WHERE platform = %s and enckey = %s"""
         cursor.execute(command, (platform, key, ))
         conn.commit()
         print(f"Password for {platform} is deleted")
@@ -102,7 +103,7 @@ def delete_password(key):
 def list_services(fi, key):
     """Lists all the services stored."""
     try:
-        command3 = f"""SELECT * FROM cred WHERE enckey = ?"""
+        command3 = f"""SELECT * FROM cred WHERE enckey = %s"""
         cursor.execute(command3, (key,))
         print("Debug")
         res = cursor.fetchall()
@@ -125,10 +126,10 @@ def spinup(conn, cursor):
     # create user table
     create_table_sql = """
     CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
+        id INTEGER AUTO_INCREMENT PRIMARY KEY,
         username TEXT NOT NULL,
-        salt TEXT NOT NULL,
-        hash TEXT NOT NULL
+        salt VARBINARY(32) NOT NULL,
+        hash BINARY(64) NOT NULL
     );
     """
     cursor.execute(create_table_sql)
@@ -136,7 +137,7 @@ def spinup(conn, cursor):
     # create cred tables
     create_table_sql = """
     CREATE TABLE IF NOT EXISTS cred (
-        cred_id INTEGER PRIMARY KEY,
+        cred_id INTEGER AUTO_INCREMENT PRIMARY KEY,
         platform TEXT NOT NULL,
         username TEXT NOT NULL,
         password BLOB NOT NULL,

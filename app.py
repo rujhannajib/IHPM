@@ -1,5 +1,4 @@
 import getpass 
-import sqlite3
 import encryption as enc
 from cryptography.fernet import Fernet
 import json
@@ -105,7 +104,6 @@ def list_services(fi, key):
     try:
         command3 = f"""SELECT * FROM cred WHERE enckey = %s"""
         cursor.execute(command3, (key,))
-        print("Debug")
         res = cursor.fetchall()
         if not res:
             print("Your password store is empty.")
@@ -127,9 +125,9 @@ def spinup(conn, cursor):
     create_table_sql = """
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER AUTO_INCREMENT PRIMARY KEY,
-        username TEXT NOT NULL,
-        salt VARBINARY(32) NOT NULL,
-        hash BINARY(64) NOT NULL
+        username TEXT NOT NULL UNIQUE,
+        salt BLOB NOT NULL,
+        hash BLOB NOT NULL
     );
     """
     cursor.execute(create_table_sql)
@@ -161,12 +159,12 @@ def main():
     elif q1.upper() == "F":
         access, encryption_key = enc.login(conn, cursor)
     if not access:
-        print("Not an authorized user")
         return
     
     # for encryption
     fernet_instance = Fernet(encryption_key)
 
+    
     while access:
         display_menu()
         choice = input("Enter your choice (1-5): ")

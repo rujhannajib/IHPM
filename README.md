@@ -23,6 +23,14 @@ Passwords are encrypted using **SHA-256 hashing** and stored locally.
 3. **Run the application**
    ```bash
    python app.py
+4. **Setup a mySQL database**
+   - Install mySQL and create a new database
+5. **Create a .env file**
+   - Fill in the credentials.
+   ```bash
+   DB_USER=
+   DB_PASSWORD=
+   DB_NAME=
 
 ## Usage
 
@@ -35,14 +43,9 @@ Passwords are encrypted using **SHA-256 hashing** and stored locally.
 
 ## How It Works
 
-1. The application uses SQLite to store account and password data.
+1. The application uses mySQL to store account and password data.
 2. Passwords are encrypted with SHA-256 hashing before being saved.
 3. You can interact with the program using a menu-driven interface in the terminal.
-
-## 📦 Dependencies
-- cffi==1.17.1
-- cryptography==45.0.6
-- pycparser==2.22
 
 ## 🔮 Future Improvements
 

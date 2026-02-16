@@ -3,6 +3,7 @@ import os
 import base64
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import db_action as dba
 
 # --- Part A: Setting the Master Password ---
 def derive_key(password, salt):
@@ -30,6 +31,7 @@ def verify_master_password(stored_salt, stored_key, password_to_check):
     if key_to_check == stored_key:
         return True, key_to_check
     else:
+        print("Incorrect password")
         return False, ""
 
 
@@ -38,6 +40,11 @@ def register_new_user(conn, cursor):
     try:
         my_username = input("Enter a username: ")
         my_password = getpass.getpass("Enter a password: ")
+        
+        status = dba.user_existed(conn, cursor, my_username)
+        # print("New register debug", status)
+        if status: raise Exception("This account already existed")
+        
         stored_salt = os.urandom(16)
         stored_key = derive_key(my_password, stored_salt)
 
@@ -51,7 +58,7 @@ def register_new_user(conn, cursor):
 
         return True, derive_key(my_password, stored_salt)
     except Exception as e:
-        print(f"Register new user: An error occured: {e}")
+        print(f"An error occured: {e}")
         return False, ""
     
 
@@ -62,16 +69,16 @@ def login(conn, cursor):
         my_password = getpass.getpass("Enter a password: ")
 
         select_password_sql = f"""
-        SELECT * FROM users WHERE username = '{my_username}'
+        SELECT * FROM users WHERE username = %s
         """
 
-        cursor.execute(select_password_sql)
+        cursor.execute(select_password_sql, (my_username,))
         res = cursor.fetchone()
         if res:
             access, key = verify_master_password(res[2], res[3], my_password)
             return access, key
         raise Exception("User not found")
     except Exception as e:
-        print(f"User is not verified:{e}")
+        print(f"{e}")
         return False, ""
     

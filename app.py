@@ -3,11 +3,24 @@ import encryption as enc
 from cryptography.fernet import Fernet
 import json
 from sqlconfig import get_connection
+import db_action as dba
 
 # connect to db
 conn = get_connection()
 cursor = conn.cursor()
 
+def intro_ascii():
+    ihpm_ascii = '''
+        /^^/^^     /^^/^^^^^^^  /^^       /^^
+        /^^/^^     /^^/^^    /^^/^ /^^   /^^^
+        /^^/^^     /^^/^^    /^^/^^ /^^ / /^^
+        /^^/^^^^^^ /^^/^^^^^^^  /^^  /^^  /^^
+        /^^/^^     /^^/^^       /^^   /^  /^^
+        /^^/^^     /^^/^^       /^^       /^^
+        /^^/^^     /^^/^^       /^^       /^^
+    '''
+    print(ihpm_ascii)
+    
 def display_menu():
     """Prints the main menu options."""
     print("\n--- Password Manager ---")
@@ -15,7 +28,8 @@ def display_menu():
     print("2. Get a password")
     print("3. List all services")
     print("4. Delete a password")
-    print("5. Quit")
+    print("5. Export my password")
+    print("6. Quit")
     print("------------------------")
 
 def add_password(fi, key):
@@ -24,14 +38,7 @@ def add_password(fi, key):
 
     platform = input("Enter the service name (e.g., 'github'): ").lower()
 
-    # check if password for the platform already existed
-    command = f"""SELECT platform FROM cred"""
-    cursor.execute(command)
-    res = cursor.fetchall()
-    existing_services = set()
-    for i in res: existing_services.add(i[0])
-    
-    while platform in existing_services:
+    while dba.platform_existed(conn, cursor, platform):
         platform = input("Service already existed. Enter different service name (e.g., 'github2'): ").lower()
 
     username = input(f"Enter your username for '{platform}': ")
@@ -163,6 +170,8 @@ def main():
     
     # for encryption
     fernet_instance = Fernet(encryption_key)
+    
+    intro_ascii()
 
     
     while access:
@@ -177,7 +186,9 @@ def main():
             list_services(fernet_instance, encryption_key)
         elif choice == "4":
             delete_password(encryption_key)
-        elif choice == '5':
+        elif choice == "5":
+            dba.export_password(conn, cursor)
+        elif choice == '6':
             print("\nGoodbye! 👋")
             break # Exit the while loop
         else:

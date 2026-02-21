@@ -150,6 +150,16 @@ def spinup(conn, cursor):
     );
     """
     cursor.execute(create_table_sql)
+    
+    create_index_1 = """
+    CREATE INDEX IDXUSERNAME ON users (username);
+    """
+    cursor.execute(create_index_1)
+    
+    create_index_2 = """
+    CREATE INDEX IDXENCKEY ON cred (enckey);
+    """
+    cursor.execute(create_index_2)
     conn.commit()
     
 
@@ -176,7 +186,7 @@ def main():
     
     while access:
         display_menu()
-        choice = input("Enter your choice (1-5): ")
+        choice = input("Enter your choice (1-6): ")
 
         if choice == '1':
             add_password(fernet_instance, encryption_key)

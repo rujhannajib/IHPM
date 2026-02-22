@@ -1,5 +1,12 @@
 cffi==1.17.1
 cryptography==45.0.6
+greenlet==3.3.2
 mysql-connector-python==9.6.0
+numpy==2.4.2
+pandas==3.0.1
 pycparser==2.22
+python-dateutil==2.9.0.post0
 python-dotenv==1.2.1
+six==1.17.0
+sqlalchemy==2.0.46
+typing-extensions==4.15.0

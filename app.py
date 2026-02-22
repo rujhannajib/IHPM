@@ -4,6 +4,7 @@ from cryptography.fernet import Fernet
 import json
 from sqlconfig import get_connection
 import db_action as dba
+import mitigation as miti
 
 # connect to db
 conn = get_connection()
@@ -197,7 +198,7 @@ def main():
         elif choice == "4":
             delete_password(encryption_key)
         elif choice == "5":
-            dba.export_password(conn, cursor)
+            miti.export_password()
         elif choice == '6':
             print("\nGoodbye! 👋")
             break # Exit the while loop
